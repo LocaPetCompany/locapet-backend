@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel target="17" />
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="locapet-backend.admin-api" options="-parameters" />
+      <module name="locapet-backend.admin-api.main" options="-parameters" />
+      <module name="locapet-backend.admin-api.test" options="-parameters" />
+      <module name="locapet-backend.app-api" options="-parameters" />
+      <module name="locapet-backend.app-api.main" options="-parameters" />
+      <module name="locapet-backend.app-api.test" options="-parameters" />
+      <module name="locapet-backend.common" options="-parameters" />
+      <module name="locapet-backend.common.main" options="-parameters" />
+      <module name="locapet-backend.common.test" options="-parameters" />
+      <module name="locapet-backend.domain" options="-parameters" />
+      <module name="locapet-backend.domain.main" options="-parameters" />
+      <module name="locapet-backend.domain.test" options="-parameters" />
+    </option>
+  </component>
+</project>
