@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm") version "2.2.21"
     kotlin("plugin.spring") version "2.2.21" apply false
@@ -10,7 +8,7 @@ plugins {
 
 allprojects {
     group = "com.vivire"
-    version = "0.0.1-SNAPSHOT"
+    version = "1.0.0-SNAPSHOT"
 
     repositories {
         mavenCentral()
@@ -19,17 +17,11 @@ allprojects {
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
+//    apply(plugin = "org.springframework.boot")
+    apply(plugin = "io.spring.dependency-management")
 
-    java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    tasks.withType<KotlinCompile> {
-        kotlinOptions {
-            freeCompilerArgs = listOf("-Xjsr305=strict")
-            jvmTarget = "17"
-        }
+    kotlin {
+        jvmToolchain(21)
     }
 
     tasks.withType<Test> {
