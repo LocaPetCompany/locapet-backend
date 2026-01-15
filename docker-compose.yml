@@ -10,12 +10,12 @@ services:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: locapet
       MYSQL_CHARACTER_SET_SERVER: utf8mb4
-      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+      MYSQL_COLLATION_SERVER: utf8mb4_0900_ai_ci
     volumes:
       - mysql-data:/var/lib/mysql
     command:
       - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
+      - --collation-server=utf8mb4_0900_ai_ci
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppassword"]
       interval: 10s
