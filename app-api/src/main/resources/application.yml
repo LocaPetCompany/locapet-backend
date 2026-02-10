@@ -36,3 +36,31 @@ springdoc:
   show-actuator: true          # (선택) Actuator 정보도 보고 싶다면
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
+
+app:
+  auth:
+    jwt:
+      secret: "locapet-jwt-secret-key-must-be-at-least-32-characters-long"
+      access-token-expiry: 1800000
+      refresh-token-expiry: 1209600000
+      temporary-token-expiry: 600000
+    social:
+      kakao:
+        user-info-url: "https://kapi.kakao.com/v2/user/me"
+      naver:
+        user-info-url: "https://openapi.naver.com/v1/nid/me"
+      google:
+        token-info-url: "https://oauth2.googleapis.com/tokeninfo"
+        client-id: "your-google-client-id"
+      apple:
+        public-keys-url: "https://appleid.apple.com/auth/keys"
+        client-id: "com.vivire.locapet"
+  meta:
+    store-urls:
+      app-store: "https://apps.apple.com/app/locapet/id123456789"
+      play-store: "https://play.google.com/store/apps/details?id=com.vivire.locapet"
+    base-url:
+      api: "https://api.locapet.com"
+    policies:
+      terms-of-service: "https://locapet.com/terms"
+      privacy-policy: "https://locapet.com/privacy"
