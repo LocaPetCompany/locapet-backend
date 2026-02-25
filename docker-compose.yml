@@ -1,23 +1,19 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: locapet-mysql
+  postgres:
+    image: postgres:16-alpine
+    container_name: locapet-postgres
     ports:
-      - "3306:3306"
+      - "5432:5432"
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: locapet
-      MYSQL_CHARACTER_SET_SERVER: utf8mb4
-      MYSQL_COLLATION_SERVER: utf8mb4_0900_ai_ci
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: locapet
+      POSTGRES_USER: root
     volumes:
-      - mysql-data:/var/lib/mysql
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_0900_ai_ci
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppassword"]
+      test: ["CMD", "pg_isready", "-U", "root", "-d", "locapet"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,5 +32,5 @@ services:
       retries: 5
 
 volumes:
-  mysql-data:
+  postgres-data:
   redis-data:

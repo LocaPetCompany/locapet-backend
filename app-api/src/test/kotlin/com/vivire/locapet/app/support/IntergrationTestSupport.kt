@@ -3,7 +3,7 @@ package com.vivire.locapet.app.support
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.testcontainers.containers.GenericContainer
-import org.testcontainers.containers.MySQLContainer
+import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 
@@ -13,10 +13,10 @@ import org.testcontainers.junit.jupiter.Testcontainers
 abstract class IntegrationTestSupport {
 
     companion object {
-        // 1. MySQL 컨테이너 정의
+        // 1. PostgreSQL 컨테이너 정의
         @Container // 테스트 시작 시 자동으로 Docker 컨테이너를 실행
         @ServiceConnection // ✨ 마법의 어노테이션! (아래 설명 참조)
-        val mysqlContainer = MySQLContainer("mysql:8.0").apply {
+        val postgresContainer = PostgreSQLContainer("postgres:16-alpine").apply {
             withDatabaseName("testdb")
             withUsername("test")
             withPassword("test")

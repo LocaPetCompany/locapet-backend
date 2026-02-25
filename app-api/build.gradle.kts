@@ -37,7 +37,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 
-    runtimeOnly("com.mysql:mysql-connector-j")
+    runtimeOnly("org.postgresql:postgresql")
 
     // test 관련 의존성
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -47,5 +47,5 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:jdbc")
-    testImplementation("org.testcontainers:mysql")
+    testImplementation("org.testcontainers:postgresql")
 }

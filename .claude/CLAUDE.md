@@ -10,7 +10,7 @@ Locapet Backend - A multi-module Kotlin/Spring Boot backend service for the Loca
 - Kotlin 2.2.21
 - Spring Boot 4.0.1
 - JDK 21
-- MySQL 8.0 database
+- PostgreSQL 16 database
 - Redis cache
 - JPA/Hibernate
 - Testcontainers for integration testing
@@ -41,7 +41,7 @@ locapet-backend/
 
 Both API modules:
 - Are configured with Spring Boot, JPA, and Spring plugins
-- Share the same MySQL database (`locapet`)
+- Share the same PostgreSQL database (`locapet`)
 - Use Redis for caching
 - Scan all packages under `com.vivire.locapet` via `@SpringBootApplication(scanBasePackages = ["com.vivire.locapet"])`
 
@@ -76,10 +76,10 @@ Both API modules:
 ### Testing
 
 **Integration Tests:**
-- Tests use **Testcontainers** for MySQL and Redis
+- Tests use **Testcontainers** for PostgreSQL and Redis
 - Base class: `IntegrationTestSupport` (note: typo in filename `IntergrationTestSupport.kt`)
 - Docker must be running for tests to execute
-- Tests automatically start MySQL 8.0 and Redis containers
+- Tests automatically start PostgreSQL 16-alpine and Redis containers
 
 ```bash
 # Run all tests (requires Docker)
@@ -94,7 +94,7 @@ Both API modules:
 ./gradlew :app-api:test --tests "com.vivire.locapet.app.support.InfrastructureTest"
 
 # Run specific test method
-./gradlew :app-api:test --tests "InfrastructureTest.MySQL 컨테이너가 정상적으로 연결되어야 한다"
+./gradlew :app-api:test --tests "com.vivire.locapet.app.support.InfrastructureTest"
 
 # Run with info logging
 ./gradlew test --info
@@ -118,14 +118,34 @@ Both API modules:
 ### Local Services
 
 Both API modules require:
-- **MySQL** running on `localhost:3306`
+- **PostgreSQL** running on `localhost:5432`
   - Database: `locapet`
   - Username: `root`
   - Password: `password`
-  - Timezone: `Asia/Seoul`
-  - Character encoding: `UTF-8`
 - **Redis** running on `localhost:6379`
 - **Docker** (required for integration tests with Testcontainers)
+
+### Docker Compose (로컬 개발 환경)
+
+프로젝트 루트의 `docker-compose.yml`로 필요한 모든 서비스를 한 번에 실행할 수 있습니다.
+
+```bash
+# 모든 서비스 시작 (PostgreSQL + Redis)
+docker-compose up -d
+
+# 서비스 상태 확인
+docker-compose ps
+
+# 서비스 종료
+docker-compose down
+
+# 데이터 포함 완전 삭제
+docker-compose down -v
+```
+
+컨테이너 정보:
+- `locapet-postgres` - postgres:16-alpine, port 5432
+- `locapet-redis` - redis:7-alpine, port 6379
 
 ### Configuration Files
 
@@ -173,6 +193,13 @@ All modules follow the base package structure: `com.vivire.locapet.*`
 - `app_versions` - App version management with force update support
 - `maintenances` - Scheduled maintenance notifications
 - `notices` - In-app notices with display scheduling
+
+**PostgreSQL 특이사항:**
+- Hibernate Dialect는 별도 설정 없이 자동 감지됨 (`application.yml`에 dialect 설정 없음이 정상)
+- Auto-increment: `BIGSERIAL` 타입 사용 (MySQL `AUTO_INCREMENT` 대체), JPA `GenerationType.IDENTITY`와 호환
+- 날짜시간: `TIMESTAMP` 사용 (MySQL `DATETIME` 대체)
+- 인라인 INDEX 불가 — 테이블 정의 외부에 `CREATE INDEX` 별도 선언 필요
+- `ENGINE=InnoDB`, `CHARSET=utf8mb4` 구문 불필요 (사용 시 syntax error)
 
 ## Important Implementation Details
 
