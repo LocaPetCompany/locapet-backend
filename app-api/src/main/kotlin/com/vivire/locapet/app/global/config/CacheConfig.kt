@@ -19,7 +19,7 @@ class CacheConfig {
 
     @Bean
     fun cacheManager(redisConnectionFactory: RedisConnectionFactory): CacheManager {
-        val objectMapper = ObjectMapper()
+        val objectMapper = ObjectMapper().findAndRegisterModules()
 
         val config = RedisCacheConfiguration.defaultCacheConfig()
             .entryTtl(Duration.ofMinutes(5))

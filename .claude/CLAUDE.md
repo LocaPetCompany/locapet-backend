@@ -197,7 +197,7 @@ All modules follow the base package structure: `com.vivire.locapet.*`
 **PostgreSQL 특이사항:**
 - Hibernate Dialect는 별도 설정 없이 자동 감지됨 (`application.yml`에 dialect 설정 없음이 정상)
 - Auto-increment: `BIGSERIAL` 타입 사용 (MySQL `AUTO_INCREMENT` 대체), JPA `GenerationType.IDENTITY`와 호환
-- 날짜시간: `TIMESTAMP` 사용 (MySQL `DATETIME` 대체)
+- 날짜시간: `TIMESTAMPTZ` 사용 (MySQL `DATETIME` 대체, UTC 타임존 포함) - V003 마이그레이션으로 기존 `TIMESTAMP` 컬럼 변환됨
 - 인라인 INDEX 불가 — 테이블 정의 외부에 `CREATE INDEX` 별도 선언 필요
 - `ENGINE=InnoDB`, `CHARSET=utf8mb4` 구문 불필요 (사용 시 syntax error)
 
@@ -208,11 +208,26 @@ All modules follow the base package structure: `com.vivire.locapet.*`
 This project uses **Spring Boot 4.0.1** which includes both Jackson 2 and Jackson 3:
 - HTTP JSON serialization: Automatic via Spring Boot
 - Redis cache serialization: Custom configuration required
-- `CacheConfig.kt` configures `GenericJackson2JsonRedisSerializer` with `JavaTimeModule` for `LocalDateTime` support
+- `CacheConfig.kt` configures `GenericJacksonJsonRedisSerializer` (Jackson 3) using `ObjectMapper().findAndRegisterModules()` for automatic module registration
 - Cache TTL: 5 minutes default
 - Serialization format: ISO-8601 for dates (not timestamps)
 
-**Important:** When caching objects with `LocalDateTime`, `LocalDate`, or other Java 8 time types, ensure the ObjectMapper includes `JavaTimeModule`.
+**Important:** All date/time fields use `java.time.Instant`. `findAndRegisterModules()` ensures Instant is correctly serialized/deserialized in Redis cache. Note: Spring Boot 4 uses `tools.jackson` package (Jackson 3), not `com.fasterxml.jackson` (Jackson 2).
+
+### UTC Timezone Strategy
+
+모든 날짜시간 처리는 UTC로 통일되어 있으며, 5개 레이어에서 설정이 적용됩니다:
+
+1. **JVM**: `common/src/main/kotlin/com/vivire/locapet/common/config/UtcTimeZoneConfig.kt` - `@PostConstruct`에서 `TimeZone.setDefault(UTC)` 호출
+2. **JDBC 연결**: `application.yml` > `spring.datasource.hikari.connection-init-sql: SET TIME ZONE 'UTC'`
+3. **Hibernate**: `application.yml` > `spring.jpa.properties.hibernate.jdbc.time_zone: UTC`
+4. **Jackson**: `application.yml` > `spring.jackson.time-zone: UTC` + `write-dates-as-timestamps: false`
+5. **Docker**: `docker-compose.yml`에서 PostgreSQL 컨테이너에 `TZ: UTC`, `PGTZ: UTC`, `command: postgres -c timezone=UTC` 적용
+
+**엔티티/DTO 날짜 타입 규칙:**
+- 반드시 `java.time.Instant` 사용 (`LocalDateTime`, `LocalDate` 사용 금지)
+- DB 컬럼은 `TIMESTAMPTZ` 타입 사용 (V003 마이그레이션으로 기존 `TIMESTAMP` 컬럼 변환 완료)
+- JSON 직렬화 포맷: ISO-8601 (`2026-02-25T09:30:00Z`)
 
 ### Custom Application Configuration
 

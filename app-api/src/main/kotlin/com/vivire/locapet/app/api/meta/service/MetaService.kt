@@ -8,7 +8,7 @@ import com.vivire.locapet.domain.meta.MaintenanceRepository
 import com.vivire.locapet.domain.meta.NoticeRepository
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Service
 class MetaService(
@@ -70,7 +70,7 @@ class MetaService(
     private fun getServerHealth(): ServerHealth {
         return ServerHealth(
             status = "HEALTHY",
-            timestamp = LocalDateTime.now()
+            timestamp = Instant.now()
         )
     }
 

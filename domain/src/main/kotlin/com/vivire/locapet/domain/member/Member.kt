@@ -1,7 +1,7 @@
 package com.vivire.locapet.domain.member
 
 import jakarta.persistence.*
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Entity
 @Table(name = "members")
@@ -35,23 +35,23 @@ class Member(
     val role: MemberRole = MemberRole.USER,
 
     @Column(nullable = false, updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: Instant = Instant.now(),
 
     @Column(nullable = false)
-    var updatedAt: LocalDateTime = LocalDateTime.now(),
+    var updatedAt: Instant = Instant.now(),
 
-    var withdrawnAt: LocalDateTime? = null
+    var withdrawnAt: Instant? = null
 ) {
 
     fun completeRegistration(nickname: String) {
         this.nickname = nickname
         this.status = MemberStatus.ACTIVE
-        this.updatedAt = LocalDateTime.now()
+        this.updatedAt = Instant.now()
     }
 
     fun withdraw() {
         this.status = MemberStatus.WITHDRAWN
-        this.withdrawnAt = LocalDateTime.now()
-        this.updatedAt = LocalDateTime.now()
+        this.withdrawnAt = Instant.now()
+        this.updatedAt = Instant.now()
     }
 }

@@ -1,7 +1,7 @@
 package com.vivire.locapet.domain.meta
 
 import jakarta.persistence.*
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Entity
 @Table(name = "notices")
@@ -27,19 +27,19 @@ class Notice(
     val priority: Int = 5,
 
     @Column(nullable = false)
-    val displayStartTime: LocalDateTime,
+    val displayStartTime: Instant,
 
     @Column(nullable = false)
-    val displayEndTime: LocalDateTime,
+    val displayEndTime: Instant,
 
     @Column(nullable = false)
     val isActive: Boolean = true,
 
     @Column(nullable = false, updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: Instant = Instant.now(),
 
     @Column(nullable = false)
-    var updatedAt: LocalDateTime = LocalDateTime.now()
+    var updatedAt: Instant = Instant.now()
 ) {
     enum class NoticeType {
         INFO, WARNING, URGENT

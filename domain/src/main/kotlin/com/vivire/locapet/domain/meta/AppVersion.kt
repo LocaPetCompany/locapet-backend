@@ -1,7 +1,7 @@
 package com.vivire.locapet.domain.meta
 
 import jakarta.persistence.*
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Entity
 @Table(name = "app_versions")
@@ -27,10 +27,10 @@ class AppVersion(
     val isActive: Boolean = true,
 
     @Column(nullable = false, updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: Instant = Instant.now(),
 
     @Column(nullable = false)
-    var updatedAt: LocalDateTime = LocalDateTime.now()
+    var updatedAt: Instant = Instant.now()
 ) {
 
     enum class Platform {

@@ -1,7 +1,7 @@
 package com.vivire.locapet.domain.meta
 
 import jakarta.persistence.*
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Entity
 @Table(name = "maintenances")
@@ -17,22 +17,22 @@ class Maintenance(
     val content: String,
 
     @Column(nullable = false)
-    val startTime: LocalDateTime,
+    val startTime: Instant,
 
     @Column(nullable = false)
-    val endTime: LocalDateTime,
+    val endTime: Instant,
 
     @Column(nullable = false)
     val isActive: Boolean = true,
 
     @Column(nullable = false, updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: Instant = Instant.now(),
 
     @Column(nullable = false)
-    var updatedAt: LocalDateTime = LocalDateTime.now()
+    var updatedAt: Instant = Instant.now()
 ) {
     fun isUnderMaintenance(): Boolean {
-        val now = LocalDateTime.now()
+        val now = Instant.now()
         return isActive && now.isAfter(startTime) && now.isBefore(endTime)
     }
 }

@@ -15,14 +15,14 @@ class InfrastructureTest : IntegrationTestSupport() {
     lateinit var redisTemplate: StringRedisTemplate
 
     @Test
-    fun `MySQL 컨테이너가 정상적으로 연결되어야 한다`() {
-        // H2가 아니라 진짜 MySQL Driver인지 확인
+    fun `PostgreSQL 컨테이너가 정상적으로 연결되어야 한다`() {
+        // H2가 아니라 진짜 PostgreSQL Driver인지 확인
         val connection = dataSource.connection
         val metaData = connection.metaData
 
         println("🔥 Connected to: ${metaData.databaseProductName} ${metaData.databaseProductVersion}")
 
-        assertThat(metaData.databaseProductName).isEqualTo("MySQL")
+        assertThat(metaData.databaseProductName).isEqualTo("PostgreSQL")
         assertThat(connection.isValid(1)).isTrue()
     }
 

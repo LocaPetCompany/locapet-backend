@@ -2,7 +2,7 @@ package com.vivire.locapet.domain.meta
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
-import java.time.LocalDateTime
+import java.time.Instant
 
 interface NoticeRepository : JpaRepository<Notice, Long> {
     @Query("""
@@ -12,5 +12,5 @@ interface NoticeRepository : JpaRepository<Notice, Long> {
         AND n.displayEndTime >= :now
         ORDER BY n.priority DESC, n.createdAt DESC
     """)
-    fun findActiveNotices(now: LocalDateTime = LocalDateTime.now()): List<Notice>
+    fun findActiveNotices(now: Instant = Instant.now()): List<Notice>
 }

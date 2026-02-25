@@ -1,7 +1,7 @@
 package com.vivire.locapet.app.api.meta.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Schema(description = "스플래시 메타데이터 응답")
 data class SplashMetaDataResponse(
@@ -53,8 +53,8 @@ data class ServerHealth(
     @Schema(description = "상태", example = "HEALTHY")
     val status: String,
 
-    @Schema(description = "타임스탬프")
-    val timestamp: LocalDateTime
+    @Schema(description = "타임스탬프 (UTC)", example = "2026-02-25T09:30:00Z")
+    val timestamp: Instant
 )
 
 @Schema(description = "점검 정보")
@@ -65,11 +65,11 @@ data class MaintenanceInfo(
     @Schema(description = "점검 내용")
     val content: String,
 
-    @Schema(description = "점검 시작 시간")
-    val startTime: LocalDateTime,
+    @Schema(description = "점검 시작 시간 (UTC)", example = "2026-02-25T10:00:00Z")
+    val startTime: Instant,
 
-    @Schema(description = "점검 종료 시간")
-    val endTime: LocalDateTime,
+    @Schema(description = "점검 종료 시간 (UTC)", example = "2026-02-25T11:00:00Z")
+    val endTime: Instant,
 
     @Schema(description = "점검 중 여부")
     val isUnderMaintenance: Boolean
@@ -98,11 +98,11 @@ data class NoticeInfo(
     @Schema(description = "우선순위", example = "5")
     val priority: Int,
 
-    @Schema(description = "노출 시작 시간")
-    val displayStartTime: LocalDateTime,
+    @Schema(description = "노출 시작 시간 (UTC)", example = "2026-02-25T08:00:00Z")
+    val displayStartTime: Instant,
 
-    @Schema(description = "노출 종료 시간")
-    val displayEndTime: LocalDateTime
+    @Schema(description = "노출 종료 시간 (UTC)", example = "2026-02-25T12:00:00Z")
+    val displayEndTime: Instant
 )
 
 @Schema(description = "정책 URL")

@@ -4,9 +4,12 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: locapet-postgres
+    command: ["postgres", "-c", "timezone=UTC"]
     ports:
       - "5432:5432"
     environment:
+      TZ: UTC
+      PGTZ: UTC
       POSTGRES_PASSWORD: password
       POSTGRES_DB: locapet
       POSTGRES_USER: root
@@ -23,6 +26,8 @@ services:
     container_name: locapet-redis
     ports:
       - "6379:6379"
+    environment:
+      TZ: UTC
     volumes:
       - redis-data:/data
     healthcheck:
