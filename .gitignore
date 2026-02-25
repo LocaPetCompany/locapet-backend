@@ -20,6 +20,10 @@
 .idea/shelf
 .idea/httpRequests
 .idea/caches/
+.idea/gradle.xml
+.idea/aws.xml
+.idea/git_toolbox_prj.xml
+.idea/copilot.data.migration.agent.xml
 
 # 2. 민감한 정보 (공유 X)
 .idea/dataSources/
@@ -40,6 +44,13 @@ Thumbs.db
 *.iml
 .idea/modules.xml
 .idea/modules/
+.kotlin/
+local.properties
+.env
+.env.*
+!.env.example
+*.local
+hs_err_pid*
+replay_pid*
 
 /CLAUDE.md
-햣
