@@ -1,14 +1,11 @@
 package com.vivire.locapet.app.api.member.controller
 
-import com.vivire.locapet.app.api.member.dto.SignUpRequest
-import com.vivire.locapet.app.api.member.dto.SignUpResponse
 import com.vivire.locapet.app.api.member.service.MemberService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -19,10 +16,10 @@ class MemberController(
     private val memberService: MemberService
 ) {
 
-    @Operation(summary = "회원가입", description = "소셜 로그인을 통해 회원가입을 진행합니다.")
-    @PostMapping("/sign-up")
-    fun signUp(@Valid @RequestBody request: SignUpRequest): ResponseEntity<SignUpResponse> {
-        val response = memberService.signUp(request)
-        return ResponseEntity.ok(response)
+    @Operation(summary = "탈퇴 신청", description = "일반탈퇴 요청 (30일 유예 기간)")
+    @PostMapping("/withdraw")
+    fun withdraw(@AuthenticationPrincipal memberId: Long): ResponseEntity<Void> {
+        memberService.requestWithdrawal(memberId)
+        return ResponseEntity.noContent().build()
     }
 }

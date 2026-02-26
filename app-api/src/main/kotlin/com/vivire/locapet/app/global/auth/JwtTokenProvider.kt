@@ -3,7 +3,6 @@ package com.vivire.locapet.app.global.auth
 import com.vivire.locapet.app.global.exception.ExpiredTokenException
 import com.vivire.locapet.app.global.exception.InvalidTokenException
 import com.vivire.locapet.common.config.AuthConfigProperties
-import com.vivire.locapet.domain.member.SocialProvider
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
@@ -36,23 +35,11 @@ class JwtTokenProvider(
         )
     }
 
-    fun createTemporaryToken(
-        socialId: String,
-        provider: SocialProvider,
-        email: String?,
-        profileImageUrl: String?
-    ): String {
-        val claims = mutableMapOf<String, Any>(
-            "provider" to provider.name,
-            "type" to "TEMPORARY"
-        )
-        email?.let { claims["email"] = it }
-        profileImageUrl?.let { claims["profileImageUrl"] = it }
-
+    fun createOnboardingAccessToken(memberId: Long): String {
         return createToken(
-            claims = claims,
-            subject = socialId,
-            expiry = authConfigProperties.jwt.temporaryTokenExpiry
+            claims = mapOf("type" to "ONBOARDING"),
+            subject = memberId.toString(),
+            expiry = authConfigProperties.jwt.onboardingTokenExpiry
         )
     }
 

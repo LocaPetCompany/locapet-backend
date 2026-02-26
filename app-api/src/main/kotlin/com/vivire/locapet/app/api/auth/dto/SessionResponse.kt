@@ -3,9 +3,9 @@ package com.vivire.locapet.app.api.auth.dto
 import com.vivire.locapet.domain.member.AccountStatus
 import com.vivire.locapet.domain.member.OnboardingStage
 
-data class ReissueResponse(
-    val accessToken: String,
-    val refreshToken: String,
+data class SessionResponse(
+    val memberId: Long,
     val accountStatus: AccountStatus,
-    val onboardingStage: OnboardingStage
+    val onboardingStage: OnboardingStage,
+    val nickname: String?
 )

@@ -23,10 +23,11 @@ class SecurityConfig(
             .httpBasic { it.disable() }
             .authorizeHttpRequests { auth ->
                 auth
-                    // Auth API - 공개
-                    .requestMatchers("/api/v1/auth/sign-in", "/api/v1/auth/reissue").permitAll()
-                    // Member API - 회원가입 공개
-                    .requestMatchers("/api/v1/member/sign-up").permitAll()
+                    // Auth API - 소셜 로그인, 토큰 재발급 공개
+                    .requestMatchers("/api/v1/auth/social/**").permitAll()
+                    .requestMatchers("/api/v1/auth/reissue").permitAll()
+                    // Onboarding API - 공개
+                    .requestMatchers("/api/v1/onboarding/**").permitAll()
                     // Meta API - 공개
                     .requestMatchers("/api/v1/meta/**").permitAll()
                     // Swagger UI
@@ -38,7 +39,7 @@ class SecurityConfig(
                     ).permitAll()
                     // Actuator
                     .requestMatchers("/actuator/**").permitAll()
-                    // 그 외 인증 필요
+                    // 그 외 인증 필요 (session, logout, withdraw 등)
                     .anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)

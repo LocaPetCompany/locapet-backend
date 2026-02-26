@@ -13,6 +13,10 @@ spring:
     hikari:
       connection-init-sql: SET TIME ZONE 'UTC'
 
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -50,9 +54,13 @@ app:
   auth:
     jwt:
       secret: "locapet-jwt-secret-key-must-be-at-least-32-characters-long"
-      access-token-expiry: 1800000
-      refresh-token-expiry: 1209600000
-      temporary-token-expiry: 600000
+      access-token-expiry: 1800000       # 30분
+      refresh-token-expiry: 1209600000   # 14일
+      onboarding-token-expiry: 1800000   # 30분
+    identity-verification:
+      provider: mock
+      ci-hmac-secret: "locapet-ci-hmac-secret-key-must-be-at-least-32-characters-long"
+      onboarding-session-ttl: 600000     # 10분
     social:
       kakao:
         user-info-url: "https://kapi.kakao.com/v2/user/me"

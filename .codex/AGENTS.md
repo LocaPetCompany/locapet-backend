@@ -47,3 +47,54 @@ This repository currently uses the `gradle` CLI (no committed `gradlew` script).
 ## Security & Configuration Tips
 - Do not commit real credentials/secrets. Use environment variables or secret managers in ECS.
 - For deployment, keep UTC settings explicit at runtime (`TZ=UTC`, `JAVA_TOOL_OPTIONS=-Duser.timezone=UTC`).
+
+## Current Auth/Onboarding Plan (Decision-Complete)
+
+### App Bootstrap Flow
+- On app launch, call `meta` and `session` in parallel.
+- `GET /api/v1/meta/splash`: maintenance/version/policy gate.
+- `GET /api/v1/auth/session`: auto-login/session routing.
+- If `session` is `401`, call `POST /api/v1/auth/reissue` then retry `session`.
+- If reissue fails, clear local tokens and route to login.
+
+### Login/Signup UX Policy
+- No separate signup button/page.
+- Social login buttons (`Kakao/Google/Apple/Naver`) are the single entry for both login and signup.
+- Routing is based on server `result`:
+  - `NEEDS_IDENTITY_VERIFICATION`
+  - `NEEDS_PROFILE`
+  - `COMPLETED`
+
+### Member State Model (Split Axes)
+- `account_status`: `ACTIVE`, `DELETION_SCHEDULED`, `DELETED`, `BANNED`
+- `onboarding_stage`: `IDENTITY_REQUIRED`, `PROFILE_REQUIRED`, `COMPLETED`
+
+### Social Linking Policy
+- CI-based multi-social linking is allowed.
+- If CI matches an existing member (and not locked), auto-link the new social account to that member.
+- DB uniqueness:
+  - `social_accounts(provider, provider_user_id)` unique
+  - `social_accounts.user_id` is NOT unique (multi-provider allowed)
+
+### Withdrawal/Rejoin Policy
+- Forced withdrawal (`BANNED`): rejoin permanently blocked.
+- Voluntary withdrawal:
+  - request -> 30-day grace (`DELETION_SCHEDULED`)
+  - after grace -> `DELETED`
+  - rejoin allowed only after an additional 30 days from `DELETED`
+
+### Identity Verification Integration
+- Use provider abstraction:
+  - `IdentityVerificationProvider.verify(transactionId) -> IdentityResult`
+- Implementations:
+  - `MockPassProvider` (current development/QA)
+  - `RealPassProvider` (post-contract switch)
+- Store CI as hash only: `ci_hash = HMAC(secret, CI)` (no raw CI storage).
+
+### API Baseline
+- `POST /api/v1/auth/social/{provider}`
+- `POST /api/v1/onboarding/identity/verify`
+- `POST /api/v1/onboarding/profile/complete`
+- `GET /api/v1/auth/session`
+- `POST /api/v1/auth/reissue`
+- `POST /api/v1/auth/logout`

@@ -5,13 +5,20 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "app.auth")
 data class AuthConfigProperties(
     val jwt: Jwt,
-    val social: Social
+    val social: Social,
+    val identityVerification: IdentityVerification
 ) {
     data class Jwt(
         val secret: String,
         val accessTokenExpiry: Long,
         val refreshTokenExpiry: Long,
-        val temporaryTokenExpiry: Long
+        val onboardingTokenExpiry: Long
+    )
+
+    data class IdentityVerification(
+        val provider: String,
+        val ciHmacSecret: String,
+        val onboardingSessionTtl: Long
     )
 
     data class Social(

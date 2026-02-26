@@ -13,6 +13,10 @@ spring:
     hikari:
       connection-init-sql: SET TIME ZONE 'UTC'
 
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
   jpa:
     hibernate:
       ddl-auto: validate

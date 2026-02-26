@@ -21,10 +21,16 @@ class GlobalExceptionHandler {
             .body(ErrorResponse(e.errorCode, e.message ?: "리프레시 토큰 오류"))
     }
 
-    @ExceptionHandler(SocialLoginFailedException::class)
-    fun handleSocialLoginFailed(e: AuthException): ResponseEntity<ErrorResponse> {
+    @ExceptionHandler(SocialLoginFailedException::class, IdentityVerificationFailedException::class)
+    fun handleBadRequest(e: AuthException): ResponseEntity<ErrorResponse> {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(ErrorResponse(e.errorCode, e.message ?: "소셜 로그인 실패"))
+            .body(ErrorResponse(e.errorCode, e.message ?: "요청 처리 실패"))
+    }
+
+    @ExceptionHandler(OnboardingSessionExpiredException::class, OnboardingStageInvalidException::class)
+    fun handleOnboardingError(e: AuthException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponse(e.errorCode, e.message ?: "온보딩 오류"))
     }
 
     @ExceptionHandler(MemberNotFoundException::class)
@@ -39,10 +45,16 @@ class GlobalExceptionHandler {
             .body(ErrorResponse(e.errorCode, e.message ?: "닉네임 중복"))
     }
 
-    @ExceptionHandler(MemberWithdrawnException::class)
-    fun handleMemberWithdrawn(e: AuthException): ResponseEntity<ErrorResponse> {
+    @ExceptionHandler(MemberWithdrawnException::class, PermanentlyBannedException::class)
+    fun handleForbiddenMember(e: AuthException): ResponseEntity<ErrorResponse> {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-            .body(ErrorResponse(e.errorCode, e.message ?: "탈퇴 회원"))
+            .body(ErrorResponse(e.errorCode, e.message ?: "접근 불가"))
+    }
+
+    @ExceptionHandler(RejoinCooldownException::class)
+    fun handleRejoinCooldown(e: AuthException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(ErrorResponse(e.errorCode, e.message ?: "재가입 대기"))
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
