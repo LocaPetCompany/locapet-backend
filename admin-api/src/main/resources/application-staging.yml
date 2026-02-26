@@ -1,0 +1,8 @@
+spring:
+  flyway:
+    enabled: false
+
+logging:
+  level:
+    com.vivire.locapet: INFO
+    org.springframework.web: INFO

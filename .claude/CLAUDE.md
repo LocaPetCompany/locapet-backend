@@ -312,3 +312,55 @@ The `app-api` module uses custom configuration properties defined in `applicatio
 - Store URLs (App Store, Play Store)
 - API base URL
 - Policy URLs (terms of service, privacy policy)
+
+## CI/CD Pipeline
+
+### 태그 기반 배포
+
+배포는 `release-{env}-{description}` 패턴의 Git 태그 push로 트리거됩니다.
+
+| 태그 패턴 | 대상 환경 | 예시 |
+|-----------|----------|------|
+| `release-dev-*` | Dev EC2 (SSM) | `release-dev-20260226`, `release-dev-hotfix-auth` |
+| `release-staging-*` | Staging ECS | `release-staging-v1.0.0` |
+| `release-prod-*` | Prod ECS (승인 필요) | `release-prod-v1.0.0` |
+
+```bash
+# 배포 트리거
+git tag release-dev-hotfix-auth
+git push origin release-dev-hotfix-auth
+```
+
+### GitHub Actions 워크플로우
+
+**CI** (`.github/workflows/ci.yml`):
+- 트리거: `push` to `main`, tags `release-*`, `pull_request` to `main`
+- Jobs: Build → Test → Upload test reports
+
+**CD** (`.github/workflows/cd.yml`):
+- 트리거: tags `release-*` only
+- Job 파이프라인:
+
+```
+resolve-env → 태그에서 환경 추출 (release-dev-* → dev)
+  ↓
+build-and-push → Docker 빌드 + ECR push (matrix: app-api, admin-api)
+  ↓
+deploy-dev (if: dev) → SSM으로 EC2 배포
+deploy-staging (if: staging) → ECS force-new-deployment + 안정화 대기
+deploy-prod (if: prod) → environment: production 승인 → ECR re-tag + ECS 배포
+```
+
+### 이미지 태그 전략
+
+| 태그 | 형식 | 용도 |
+|-----|------|------|
+| Git 태그명 | `release-dev-hotfix-auth` | 배포 추적 |
+| 환경 latest | `dev-latest` | 최신 환경별 이미지 참조 |
+| Prod | `prod` | re-tag로 생성, ECS Task Definition 참조 |
+
+### AWS 인증
+
+GitHub OIDC → IAM Role (정적 Access Key 불필요):
+- Role ARN: `secrets.AWS_ROLE_ARN`
+- Region: `ap-northeast-2`

@@ -34,3 +34,21 @@ IaC 저장소에서 위 환경 변수를 명시하고, 서비스 배포 시 UTC 
 - Dockerfile이 있으면 `ENV TZ=UTC`를 명시하는 것을 권장
 - Dockerfile이 없어도 ECS Task env(`TZ`, `JAVA_TOOL_OPTIONS`)로 동일 정책 적용 가능
 - 로컬 `docker-compose.yml`의 PostgreSQL도 `timezone=UTC`로 고정
+
+## 환경별 설정 프로파일
+
+- Spring profile은 `local`, `dev`, `stg`, `prd`를 사용한다.
+- 기본 profile은 `local`이다 (`spring.profiles.default=local`).
+- 파일 구조:
+  - `app-api/src/main/resources/application.yml`
+  - `app-api/src/main/resources/application-{local,dev,stg,prd}.yml`
+  - `admin-api/src/main/resources/application.yml`
+  - `admin-api/src/main/resources/application-{local,dev,stg,prd}.yml`
+
+### 실행 예시
+
+- app-api local(default): `gradle :app-api:bootRun`
+- app-api dev: `gradle :app-api:bootRun --args='--spring.profiles.active=dev'`
+- admin-api stg: `gradle :admin-api:bootRun --args='--spring.profiles.active=stg'`
+
+> 주의: `dev/stg/prd` 파일의 비밀번호/시크릿 값은 샘플 placeholder이며, 실제 값은 배포 환경 변수/시크릿 매니저로 주입한다.

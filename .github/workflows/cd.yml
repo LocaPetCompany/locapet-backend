@@ -1,0 +1,197 @@
+name: CD
+
+on:
+  push:
+    tags: ['release-*']
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-northeast-2
+
+jobs:
+  resolve-env:
+    name: Resolve Environment
+    runs-on: ubuntu-latest
+    outputs:
+      env_name: ${{ steps.extract.outputs.env_name }}
+      is_dev: ${{ steps.extract.outputs.is_dev }}
+      is_staging: ${{ steps.extract.outputs.is_staging }}
+      is_prod: ${{ steps.extract.outputs.is_prod }}
+    steps:
+      - name: Extract environment from tag
+        id: extract
+        run: |
+          TAG="${{ github.ref_name }}"
+          ENV=$(echo "$TAG" | sed 's/release-\([a-z]*\)-.*/\1/')
+
+          if [[ "$ENV" != "dev" && "$ENV" != "staging" && "$ENV" != "prod" ]]; then
+            echo "::error::Invalid tag pattern: $TAG. Expected release-{dev|staging|prod}-*"
+            exit 1
+          fi
+
+          echo "env_name=$ENV" >> "$GITHUB_OUTPUT"
+          echo "is_dev=$([[ "$ENV" == "dev" ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "is_staging=$([[ "$ENV" == "staging" ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "is_prod=$([[ "$ENV" == "prod" ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+          echo "### Deployment Target" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Tag:** $TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Environment:** $ENV" >> "$GITHUB_STEP_SUMMARY"
+
+  build-and-push:
+    name: Build & Push (${{ matrix.module }})
+    needs: resolve-env
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module: [app-api, admin-api]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.ref_name }}
+          ENV_NAME: ${{ needs.resolve-env.outputs.env_name }}
+        run: |
+          docker build \
+            --build-arg MODULE=${{ matrix.module }} \
+            -t $ECR_REGISTRY/locapet-${{ matrix.module }}:$IMAGE_TAG \
+            -t $ECR_REGISTRY/locapet-${{ matrix.module }}:$ENV_NAME-latest \
+            .
+          docker push $ECR_REGISTRY/locapet-${{ matrix.module }}:$IMAGE_TAG
+          docker push $ECR_REGISTRY/locapet-${{ matrix.module }}:$ENV_NAME-latest
+
+  deploy-dev:
+    name: Deploy to Dev EC2
+    needs: [resolve-env, build-and-push]
+    if: needs.resolve-env.outputs.is_dev == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Deploy via SSM
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.ref_name }}
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ secrets.DEV_EC2_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands='[
+              "cd /opt/locapet",
+              "bash scripts/fetch-secrets.sh ${{ secrets.SECRETS_MANAGER_SECRET_NAME_DEV }} /opt/locapet",
+              "echo ECR_REGISTRY='"$ECR_REGISTRY"' >> .env",
+              "echo IMAGE_TAG='"$IMAGE_TAG"' >> .env",
+              "echo SPRING_PROFILES_ACTIVE=dev >> .env",
+              "aws ecr get-login-password --region '"${{ env.AWS_REGION }}"' | docker login --username AWS --password-stdin '"$ECR_REGISTRY"'",
+              "docker compose -f docker-compose.deploy.yml pull",
+              "docker compose -f docker-compose.deploy.yml up -d",
+              "docker image prune -f"
+            ]' \
+            --timeout-seconds 300 \
+            --comment "Deploy locapet dev - $IMAGE_TAG"
+
+  deploy-staging:
+    name: Deploy to Staging ECS (${{ matrix.module }})
+    needs: [resolve-env, build-and-push]
+    if: needs.resolve-env.outputs.is_staging == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module: [app-api, admin-api]
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service \
+            --cluster locapet-staging \
+            --service locapet-${{ matrix.module }} \
+            --force-new-deployment
+
+      - name: Wait for deployment
+        run: |
+          aws ecs wait services-stable \
+            --cluster locapet-staging \
+            --services locapet-${{ matrix.module }}
+
+  deploy-prod:
+    name: Deploy to Prod ECS (${{ matrix.module }})
+    needs: [resolve-env, build-and-push]
+    if: needs.resolve-env.outputs.is_prod == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    strategy:
+      matrix:
+        module: [app-api, admin-api]
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Re-tag image for production
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+        run: |
+          MANIFEST=$(aws ecr batch-get-image \
+            --repository-name locapet-${{ matrix.module }} \
+            --image-ids imageTag=${{ github.ref_name }} \
+            --query 'images[0].imageManifest' --output text)
+
+          aws ecr put-image \
+            --repository-name locapet-${{ matrix.module }} \
+            --image-tag prod \
+            --image-manifest "$MANIFEST"
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service \
+            --cluster locapet-prod \
+            --service locapet-${{ matrix.module }} \
+            --force-new-deployment
+
+      - name: Wait for deployment
+        run: |
+          aws ecs wait services-stable \
+            --cluster locapet-prod \
+            --services locapet-${{ matrix.module }}

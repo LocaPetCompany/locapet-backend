@@ -4,14 +4,21 @@ server:
 spring:
   application:
     name: locapet-app-api
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/locapet
-    username: root
-    password: password
     driver-class-name: org.postgresql.Driver
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/locapet}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:password}
     hikari:
       connection-init-sql: SET TIME ZONE 'UTC'
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
   flyway:
     enabled: true
@@ -20,7 +27,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -32,34 +39,29 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
-  data:
-    redis:
-      host: localhost
-      port: 6379
-
 springdoc:
   swagger-ui:
-    path: /api-app.html       # 접속 주소를 내가 원하는 대로 변경 (기본값은 /swagger-ui.html)
-    groups-order: DESC         # 그룹 정렬 순서
-    operations-sorter: alpha   # API 목록을 알파벳 순으로 정렬 (method 아님)
-    disable-swagger-default-url: true # 기본 petstore URL 비활성화
-    display-request-duration: true # API 요청 걸린 시간 표시 (성능 체크용)
+    path: /api-app.html
+    groups-order: DESC
+    operations-sorter: alpha
+    disable-swagger-default-url: true
+    display-request-duration: true
   api-docs:
-    path: /api-docs            # JSON 데이터가 나오는 경로
-  show-actuator: true          # (선택) Actuator 정보도 보고 싶다면
+    path: /api-docs
+  show-actuator: true
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
 
 app:
   auth:
     jwt:
-      secret: "locapet-jwt-secret-key-must-be-at-least-32-characters-long"
+      secret: ${JWT_SECRET:locapet-jwt-secret-key-must-be-at-least-32-characters-long}
       access-token-expiry: 1800000       # 30분
       refresh-token-expiry: 1209600000   # 14일
       onboarding-token-expiry: 1800000   # 30분
     identity-verification:
-      provider: mock
-      ci-hmac-secret: "locapet-ci-hmac-secret-key-must-be-at-least-32-characters-long"
+      provider: ${IDENTITY_VERIFICATION_PROVIDER:mock}
+      ci-hmac-secret: ${CI_HMAC_SECRET:locapet-ci-hmac-secret-key-must-be-at-least-32-characters-long}
       onboarding-session-ttl: 600000     # 10분
     social:
       kakao:
@@ -68,10 +70,10 @@ app:
         user-info-url: "https://openapi.naver.com/v1/nid/me"
       google:
         token-info-url: "https://oauth2.googleapis.com/tokeninfo"
-        client-id: "your-google-client-id"
+        client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
       apple:
         public-keys-url: "https://appleid.apple.com/auth/keys"
-        client-id: "com.vivire.locapet"
+        client-id: ${APPLE_CLIENT_ID:com.vivire.locapet}
   meta:
     store-urls:
       app-store: "https://apps.apple.com/app/locapet/id123456789"

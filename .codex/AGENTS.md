@@ -19,6 +19,21 @@ This repository currently uses the `gradle` CLI (no committed `gradlew` script).
 - `gradle :admin-api:bootRun`: run admin API locally (default port `8081`).
 - `docker compose up -d postgres redis`: start local infra services.
 
+## Environment Profiles
+- Spring profiles are split into `local`, `dev`, `stg`, `prd` for both `app-api` and `admin-api`.
+- Default profile is `local` (`spring.profiles.default=local`).
+- Config file layout:
+  - `app-api/src/main/resources/application.yml`
+  - `app-api/src/main/resources/application-{local,dev,stg,prd}.yml`
+  - `admin-api/src/main/resources/application.yml`
+  - `admin-api/src/main/resources/application-{local,dev,stg,prd}.yml`
+- `application.yml` keeps shared config only; environment-specific values belong in `application-{profile}.yml`.
+- `dev/stg/prd` files must not contain real secrets; keep placeholders and inject real values via environment variables/secret manager at deploy time.
+- Example runs:
+  - `gradle :app-api:bootRun` (default `local`)
+  - `gradle :app-api:bootRun --args='--spring.profiles.active=dev'`
+  - `gradle :admin-api:bootRun --args='--spring.profiles.active=stg'`
+
 ## Coding Style & Naming Conventions
 - Language: Kotlin (JDK 21), Spring Boot multi-module Gradle project.
 - Indentation: 4 spaces; keep lines and functions concise.
