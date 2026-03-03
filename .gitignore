@@ -30,8 +30,12 @@
 .idea/dataSources/
 .idea/dataSources.ids
 .idea/dataSources.local.xml
+.idea/dataSources.xml
 .idea/sqlDataSources.xml
 .idea/**/secret.xml
+
+# 3. IDE 자동 생성 파일 (공유 X)
+.idea/AndroidProjectSystem.xml
 
 # 3. 빌드 결과물 (공유 X)
 out/
