@@ -12,8 +12,8 @@ env:
   AWS_REGION: ap-northeast-2
 
 jobs:
-  resolve-env:
-    name: Resolve Environment
+  resolve-context:
+    name: Resolve CD Context
     runs-on: ubuntu-latest
     outputs:
       env_name: ${{ steps.extract.outputs.env_name }}
@@ -25,11 +25,16 @@ jobs:
         id: extract
         run: |
           TAG="${{ github.ref_name }}"
-          ENV=$(echo "$TAG" | sed 's/release-\([a-z]*\)-.*/\1/')
 
-          if [[ "$ENV" != "dev" && "$ENV" != "staging" && "$ENV" != "prod" ]]; then
-            echo "::error::Invalid tag pattern: $TAG. Expected release-{dev|staging|prod}-*"
-            exit 1
+          if [[ "$TAG" == release-dev* ]]; then
+          ENV="dev"
+          elif [[ "$TAG" == release-staging* ]]; then
+          ENV="staging"
+          elif [[ "$TAG" == release-prod* ]]; then
+          ENV="prod"
+          else
+          echo "::error::Invalid tag pattern: $TAG. Expected release-dev*, release-staging*, or release-prod*"
+          exit 1
           fi
 
           echo "env_name=$ENV" >> "$GITHUB_OUTPUT"
@@ -41,9 +46,9 @@ jobs:
           echo "- **Tag:** $TAG" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Environment:** $ENV" >> "$GITHUB_STEP_SUMMARY"
 
-  build-and-push:
-    name: Build & Push (${{ matrix.module }})
-    needs: resolve-env
+  push-image:
+    name: Push Image (${{ matrix.module }})
+    needs: resolve-context
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -67,7 +72,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
-          ENV_NAME: ${{ needs.resolve-env.outputs.env_name }}
+          ENV_NAME: ${{ needs.resolve-context.outputs.env_name }}
         run: |
           docker build \
             --build-arg MODULE=${{ matrix.module }} \
