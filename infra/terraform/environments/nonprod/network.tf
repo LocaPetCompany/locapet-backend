@@ -126,3 +126,20 @@ resource "aws_db_subnet_group" "nonprod" {
     ManagedBy   = "terraform"
   }
 }
+
+resource "aws_elasticache_subnet_group" "redis" {
+  name = "locapet-nonprod-redis-subnet-group"
+
+  subnet_ids = [
+    aws_subnet.private_db_1.id,
+    aws_subnet.private_db_2.id
+  ]
+
+  tags = {
+    Name        = "locapet-nonprod-redis-subnet-group"
+    Project     = "locapet"
+    Environment = "nonprod"
+    Component   = "redis"
+    ManagedBy   = "terraform"
+  }
+}
