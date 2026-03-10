@@ -110,3 +110,19 @@ resource "aws_route_table_association" "public_2" {
   subnet_id      = aws_subnet.public_2.id
   route_table_id = aws_route_table.public.id
 }
+
+resource "aws_db_subnet_group" "nonprod" {
+  name = "locapet-nonprod-db-subnet-group"
+
+  subnet_ids = [
+    aws_subnet.private_db_1.id,
+    aws_subnet.private_db_2.id
+  ]
+
+  tags = {
+    Name        = "locapet-nonprod-db-subnet-group"
+    Project     = "locapet"
+    Environment = "nonprod"
+    ManagedBy   = "terraform"
+  }
+}
