@@ -35,7 +35,8 @@ class SecurityConfig(
                         "/api-app.html",
                         "/api-docs/**",
                         "/swagger-ui/**",
-                        "/v3/api-docs/**"
+                        "/v3/api-docs/**",
+                        "/api-docs"
                     ).permitAll()
                     // Actuator
                     .requestMatchers("/actuator/**").permitAll()
