@@ -35,7 +35,7 @@ dependencies {
 //    implementation("tools.jackson.datatype:jackson-datatype-jsr310")
     implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0")
 
     runtimeOnly("org.postgresql:postgresql")
 

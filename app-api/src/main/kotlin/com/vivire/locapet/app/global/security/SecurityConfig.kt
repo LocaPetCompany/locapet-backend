@@ -1,5 +1,6 @@
 package com.vivire.locapet.app.global.security
 
+import jakarta.servlet.DispatcherType
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -23,6 +24,8 @@ class SecurityConfig(
             .httpBasic { it.disable() }
             .authorizeHttpRequests { auth ->
                 auth
+                    // FORWARD/ERROR 디스패치 허용
+                    .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
                     // Auth API - 소셜 로그인, 토큰 재발급 공개
                     .requestMatchers("/api/v1/auth/social/**").permitAll()
                     .requestMatchers("/api/v1/auth/reissue").permitAll()
@@ -33,10 +36,10 @@ class SecurityConfig(
                     // Swagger UI
                     .requestMatchers(
                         "/api-app.html",
+                        "/api-docs",
                         "/api-docs/**",
                         "/swagger-ui/**",
-                        "/v3/api-docs/**",
-                        "/api-docs"
+                        "/v3/api-docs/**"
                     ).permitAll()
                     // Actuator
                     .requestMatchers("/actuator/**").permitAll()
