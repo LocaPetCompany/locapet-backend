@@ -5,7 +5,7 @@ resource "aws_ecs_service" "app_api" {
   launch_type     = "FARGATE"
   desired_count   = 1
 
-  health_check_grace_period_seconds = 120
+  health_check_grace_period_seconds = 180
 
   deployment_circuit_breaker {
     enable   = true
