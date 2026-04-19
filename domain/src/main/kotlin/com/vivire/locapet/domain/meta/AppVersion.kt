@@ -1,10 +1,15 @@
 package com.vivire.locapet.domain.meta
 
+import com.vivire.locapet.domain.share.ModifiedTraceable
 import jakarta.persistence.*
-import java.time.Instant
 
 @Entity
-@Table(name = "app_versions")
+@Table(
+    name = "app_versions",
+    indexes = [
+        Index(name = "idx_platform_active", columnList = "platform, is_active"),
+    ],
+)
 class AppVersion(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -13,28 +18,21 @@ class AppVersion(
     @Column(nullable = false, unique = true, length = 20)
     val version: String,
 
-    @Column(nullable = false)
+    @Column(name = "force_update", nullable = false)
     val forceUpdate: Boolean = false,
 
-    @Column(length = 20)
+    @Column(name = "minimum_version", length = 20)
     val minimumVersion: String? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     val platform: Platform,
 
-    @Column(nullable = false)
+    @Column(name = "is_active", nullable = false)
     val isActive: Boolean = true,
-
-    @Column(nullable = false, updatable = false)
-    val createdAt: Instant = Instant.now(),
-
-    @Column(nullable = false)
-    var updatedAt: Instant = Instant.now()
-) {
+) : ModifiedTraceable() {
 
     enum class Platform {
         IOS, ANDROID, ALL
     }
-
 }

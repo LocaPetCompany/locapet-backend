@@ -1,5 +1,6 @@
 package com.vivire.locapet.domain.member
 
+import com.vivire.locapet.domain.share.ModifiedTraceable
 import jakarta.persistence.*
 import java.time.Instant
 
@@ -7,26 +8,22 @@ import java.time.Instant
 @Table(name = "identity_locks")
 class IdentityLock(
     @Id
-    @Column(length = 128)
+    @Column(name = "ci_hash", length = 128)
     val ciHash: String,
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(name = "lock_type", nullable = false, length = 20)
     var lockType: IdentityLockType,
 
+    @Column(name = "locked_until")
     var lockedUntil: Instant? = null,
 
     @Column(nullable = false, length = 50)
     var reason: String,
 
+    @Column(name = "member_id")
     var memberId: Long? = null,
-
-    @Column(nullable = false, updatable = false)
-    val createdAt: Instant = Instant.now(),
-
-    @Column(nullable = false)
-    var updatedAt: Instant = Instant.now()
-) {
+) : ModifiedTraceable() {
 
     fun isLocked(now: Instant = Instant.now()): Boolean = when (lockType) {
         IdentityLockType.PERMANENT -> true

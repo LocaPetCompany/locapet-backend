@@ -1,10 +1,16 @@
 package com.vivire.locapet.domain.meta
 
+import com.vivire.locapet.domain.share.ModifiedTraceable
 import jakarta.persistence.*
 import java.time.Instant
 
 @Entity
-@Table(name = "notices")
+@Table(
+    name = "notices",
+    indexes = [
+        Index(name = "idx_display_priority", columnList = "display_start_time, display_end_time, priority DESC"),
+    ],
+)
 class Notice(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,31 +22,26 @@ class Notice(
     @Column(nullable = false, columnDefinition = "TEXT")
     val content: String,
 
-    @Column(length = 500)
+    @Column(name = "router_url", length = 500)
     val routerUrl: String? = null,
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(name = "notice_type", nullable = false, length = 20)
     val noticeType: NoticeType,
 
     @Column(nullable = false)
     val priority: Int = 5,
 
-    @Column(nullable = false)
+    @Column(name = "display_start_time", nullable = false)
     val displayStartTime: Instant,
 
-    @Column(nullable = false)
+    @Column(name = "display_end_time", nullable = false)
     val displayEndTime: Instant,
 
-    @Column(nullable = false)
+    @Column(name = "is_active", nullable = false)
     val isActive: Boolean = true,
+) : ModifiedTraceable() {
 
-    @Column(nullable = false, updatable = false)
-    val createdAt: Instant = Instant.now(),
-
-    @Column(nullable = false)
-    var updatedAt: Instant = Instant.now()
-) {
     enum class NoticeType {
         INFO, WARNING, URGENT
     }

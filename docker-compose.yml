@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgis/postgis:16-3.4-alpine
     container_name: locapet-postgres
     command: ["postgres", "-c", "timezone=UTC"]
     ports:

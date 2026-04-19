@@ -125,12 +125,11 @@ class OnboardingService(
         )
         socialAccountRepository.save(newSocialAccount)
 
-        // identity_lock 갱신
+        // identity_lock 갱신 (updatedAt 은 @LastModifiedDate 로 자동 설정)
         lock.lockType = IdentityLockType.ACTIVE_ACCOUNT
         lock.lockedUntil = null
         lock.reason = "ACTIVE_ACCOUNT"
         lock.memberId = member.id
-        lock.updatedAt = java.time.Instant.now()
 
         saveVerificationLog(member.id, transactionId, VerificationStatus.SUCCESS, ciHash)
 

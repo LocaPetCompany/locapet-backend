@@ -6,6 +6,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import org.testcontainers.utility.DockerImageName
 
 
 @SpringBootTest // 통합 테스트 환경 로드
@@ -16,7 +17,10 @@ abstract class IntegrationTestSupport {
         // 1. PostgreSQL 컨테이너 정의
         @Container // 테스트 시작 시 자동으로 Docker 컨테이너를 실행
         @ServiceConnection // ✨ 마법의 어노테이션! (아래 설명 참조)
-        val postgresContainer = PostgreSQLContainer("postgres:16-alpine").apply {
+        val postgresContainer = PostgreSQLContainer(
+            DockerImageName.parse("postgis/postgis:16-3.4-alpine")
+                .asCompatibleSubstituteFor("postgres")
+        ).apply {
             withDatabaseName("testdb")
             withUsername("test")
             withPassword("test")
