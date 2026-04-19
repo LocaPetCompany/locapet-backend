@@ -23,6 +23,7 @@
 .idea/caches/
 .idea/gradle.xml
 .idea/aws.xml
+.idea/awsToolkit.xml
 .idea/git_toolbox_prj.xml
 .idea/copilot.data.migration.agent.xml
 
